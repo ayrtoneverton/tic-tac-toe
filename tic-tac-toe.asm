@@ -3,14 +3,23 @@ map: .word 0
 red: .asciiz "\nRed Winner!\n"
 blue: .asciiz "\nBlue Winner!\n"
 none: .asciiz "\nNo one won!\n"
+invalid: .asciiz "Invalid move, try another\n"
 
-.text   
+.text
 
-# Constants
+# Constant
 li $t1, 0xFFFFFF # Initial white color, if $t1 == 0xFF0000 then Player Red else Player Blue
 
+# Clear bitmap
+li $t2, 0 # Count
+clear:
+	sw $zero, map($t2)
+	addu $t2, $t2, 4
+	bne $t2, 4096, clear
+
+li $t5, 29 # Max bitmaps
+
 # Bitmap columns
-li $t5, 29 # Max
 li $t2, 1 # Count X
 barY1:
 	li $t3, 0 # Count Y
@@ -53,6 +62,26 @@ run:
 	mulu $t5, $t3, 640
 	addu $t4, $t4, $t5
 
+	# Validation of move
+	slti $t6, $t2, 0
+	li $t7, 5
+	slt $t7, $t7, $t2
+	or $t5, $t6, $t7
+	slti $t6, $t3, 0
+	or $t5, $t5, $t6
+	li $t7, 5
+	slt $t7, $t7, $t3
+	or $t5, $t5, $t7
+	lw $t6, map($t4)
+	slt $t6, $zero, $t6
+	or $t5, $t5, $t6
+	beqz $t5, valid
+		li $v0, 4
+		la $a0, invalid
+		syscall
+		j run
+
+	valid:
 	beq $t1, 0xFF0000, elseColor
 		li $t1, 0xFF0000 # Red
 		j fillingColor
