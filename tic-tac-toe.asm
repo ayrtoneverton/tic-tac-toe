@@ -11,7 +11,7 @@ invalid: .asciiz "Invalid move, try another\n"
 li $t1, 0xFFFFFF # Initial white color, if $t1 == 0xFF0000 then Player Red else Player Blue
 
 # Clear bitmap
-li $t2, 0 # Count
+li $t2, 128 # Count
 clear:
 	sw $zero, map($t2)
 	addu $t2, $t2, 4
